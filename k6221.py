@@ -256,7 +256,7 @@ class Keithley6221:
         if True:
             logger.info(f"Setting DELTA value to [{delta}]")
             assert 0 < delta < 105e-3
-            self._device.write(f"SOUR:DCON:DELTa 1e-6")
+            self._device.write(f"SOUR:DCON:DELTa {delta}")
             print("And DELTA = ", self._device.query("SOUR:DCON:DELTa?").strip())
             self.get_error_status()
 
@@ -286,6 +286,8 @@ class Keithley6221:
 
     def WriteCommand(self,command):
         self._device.write(command)
+    def QueryCommand(self,command):
+        return self._device.query(command)
 
     ########################################################################
     #     Linear Sweep
