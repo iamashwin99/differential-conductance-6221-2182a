@@ -205,7 +205,8 @@ class Keithley6221:
         time.sleep(2)
         self.get_error_status()
         # # To disarm -- SOUR:SWE:ABOR
-        self._device.write("SOUR:SWE:ABOR")
+        #self._device.write("SOUR:SWE:ABOR")
+
 
     ########################################################################
     #     Linear Sweep
@@ -217,10 +218,11 @@ class Keithley6221:
             step_size: float=1e-6,
             delta: float=20e-6,
             delay: float=1e-1,
-            buffer_points: int=60000,
+            buffer_points: int=100,
             rate_2182a_in_nplc: int=5,
+            enable_compliance_abort: ON_OFF_STATE=ON_OFF_STATE.OFF,
+
     ) -> None:
-        enable_compliance_abort = self.ON_OFF_STATE.ON
         is_2182_ok = self.get_dcond_2182_presence()
         if not is_2182_ok:
             logger.warning("Cannot establish a connection between 6221 and 2182A via nul-modem cable")
@@ -263,9 +265,11 @@ class Keithley6221:
         if True:
             assert 1e-3 < delay < 9999.999
             self._device.write(f"SOUR:DCON:DELay {delay}")
+            print("And DELAY = ", self._device.query("SOUR:DCON:DELay?").strip())
             self.get_error_status()
 
         self._device.write(f"SOUR:DCON:CAB {enable_compliance_abort.value}")
+        print("And CAB = ", self._device.query("SOUR:DCON:CAB?").strip())
         self.get_error_status()
         self._device.write(f"TRAC:POIN {buffer_points}")
         self.get_error_status()
@@ -275,7 +279,7 @@ class Keithley6221:
         print("dIdV program is fully initialized!")
         # self.get_error_status()
         # To disarm -- SOUR:SWE:ABOR
-        self._device.write("SOUR:SWE:ABOR")
+        #self._device.write("SOUR:SWE:ABOR")
         return
 
     def GetData(self) -> float:
@@ -288,6 +292,9 @@ class Keithley6221:
         self._device.write(command)
     def QueryCommand(self,command):
         return self._device.query(command)
+
+    def AbortSWE(self):
+        self._device.write("SOUR:SWE:ABOR")
 
     ########################################################################
     #     Linear Sweep
@@ -581,9 +588,9 @@ if __name__ == "__main__":
         address = "TCPIP::10.0.4.138::1394::SOCKET"
         dev = Keithley6221(address=address, rm=rm)
         print(dev.get_idn())
-        start_current = -10e-6
-        stop_current=10e-6
-        step_size=1e-6
+        start_current = -25e-6
+        stop_current=25e-6
+        step_size=0.1e-6
         delay=0.002
         delta=1e-6
         buffer_points: int = 60000
