@@ -153,8 +153,8 @@ class Keithley6221:
     ) -> None:
 
         """
-        Эта функция запускать процесс измерения данных, но не хранит ничего в буфере.
-        Это значит, что данные можно будет получать просто запросом -- get_delta_data или что-то в этом роде
+        This function starts the data measurement process, but does not store anything in the buffer.
+        This means that the data can be obtained simply by a request -- get_delta_data or something like that.
         """
         enable_compliance_abort = self.ON_OFF_STATE.ON
         is_2182_ok = self.get_delta_2182_presence()
@@ -205,6 +205,7 @@ class Keithley6221:
         time.sleep(2)
         self.get_error_status()
         # # To disarm -- SOUR:SWE:ABOR
+        self._device.write("SOUR:SWE:ABOR")
 
     ########################################################################
     #     Linear Sweep
@@ -274,6 +275,7 @@ class Keithley6221:
         print("dIdV program is fully initialized!")
         # self.get_error_status()
         # To disarm -- SOUR:SWE:ABOR
+        self._device.write("SOUR:SWE:ABOR")
         return
 
     def GetData(self) -> float:
@@ -281,6 +283,9 @@ class Keithley6221:
         #print(response)
         #print(self.get_units())
         return float(response.split(',')[0])
+
+    def WriteCommand(self,command):
+        self._device.write(command)
 
     ########################################################################
     #     Linear Sweep
@@ -418,19 +423,19 @@ class Keithley6221:
         generated, and the waveform does not initiate. This command is not accepted
         while the wave is armed (Error +404 Not allowed with Wave Armed).
 
-        Если установлен BEST range, то в зависимости от текущей амплитуды на этапе ARM'а происходит выбор range'а,
-        который не будет изменяться до наступления следующего ARM'a.
+       If BEST range is set, then depending on the current amplitude at the ARM stage, a range is selected,
+        which will not change until the next ARM'a.
 
         """
         self._device.write(f"SOUR:WAVE:RANG {range.value}")
 
     def set_wave_amplitude(self, rms: float):
         """
-        Поскольку мы большую часть времени работаем с локанами, то все наши данные идут как RMS.
-        Keithley6221 по умолчанию работает как one-half the peak-to-peak value,
-        иными словами, просто амплитуда. Поэтому когда я говорю, что хочу иметь определённую амплитуду, то
-        хочу видеть это значение на локине, то есть мне нужно задавать соотвествующий RMS,
-        поэтому мне надо умножать на 1.41.
+       Since we work with locales most of the time, all our data is sent as RMS.
+        Keithley6221 works as one-half the peak-to-peak value by default,
+        in other words, just amplitude. Therefore, when I say that I want to have a certain amplitude, then
+        I want to see this value on the local, that is, I need to set the appropriate RMS,
+        so I need to multiply by 1.41.
         : amplitude -- RMS
         """
         coefficient_from_effective_current = 2 ** 0.5
