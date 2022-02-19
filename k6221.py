@@ -213,6 +213,7 @@ class Keithley6221:
     ########################################################################
     def RunDifferentialConductanceMeasurements(
             self,
+            units: UNITS,
             start_current: float=0,
             stop_current: float=1000e-6,
             step_size: float=1e-6,
@@ -231,7 +232,13 @@ class Keithley6221:
             logging.info("Keithley6221 output=ON detected. Turning it OFF.")
             self.turn_output_off()
         self.restore_defaults()
+        logger.info("Set units to {units.value}")
+        #self.set_units(self.UNITS.Ohms)
+        self._device.write(f"UNIT:VOLT:DC {units.value}")
+        self.get_error_status()
+        logger.info("Query units")
         units = self.get_units()
+        self.get_error_status()
         logging.info(f"Current units on Keithley6221 = [{units.value}]")
 
         if True: # First, initialize START CURRENT
