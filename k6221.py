@@ -317,6 +317,7 @@ class Keithley6221:
         self._device.write(f"SOUR:SWE:COUN 1")
         self._device.write(f"SOUR:SWE:CAB OFF")
         self._device.write(f"SOUR:SWE:ARM")
+        #self._device.write(f"INIT:IMM")
         self._device.write(f"INIT")
 
     #######################################################
