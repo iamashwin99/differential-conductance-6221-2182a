@@ -1,4 +1,5 @@
 from typing import Tuple, List, Dict, Union, Optional
+from numpy import NaN
 import pyvisa
 import time
 import pyvisa.constants
@@ -536,7 +537,13 @@ class Keithley6221:
     def get_trace_data(self) -> List[float]:
         response = self._device.query(f"TRACe:DATA?").strip()
         numbers = response.split(",")
-        result = [float(number) for number in numbers]
+        result = []
+        for number in numbers:
+            try:
+                result.append(float(number))
+            except ValueError:
+                result.append(NaN)
+        #result = [float(number) if number!= ' ' else NaN for number in numbers]
         logger.info(f"Response from trace = [{response}]")
         return result
 
