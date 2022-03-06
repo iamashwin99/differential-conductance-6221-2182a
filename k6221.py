@@ -46,6 +46,7 @@ class Keithley6221:
         Ohms = "OHMS"
         Watts = "W"
         Siemens = "SIEM"
+        SiemenOld = "S"
 
 
     MINIMUM_CURRENT = 2e-12
